@@ -12,15 +12,23 @@ from app.config import get_settings
 
 settings = get_settings()
 
-# Create SQLAlchemy engine with connection pooling
-engine = create_engine(
-    settings.database_url,
-    pool_pre_ping=True,      # Verify connections before using
-    pool_size=5,             # Number of connections to keep open
-    max_overflow=10,         # Max additional connections when pool is full
-    pool_recycle=3600,       # Recycle connections after 1 hour
-    echo=settings.debug      # Log SQL queries in debug mode
-)
+# Create SQLAlchemy engine
+if "sqlite" in settings.database_url:
+    connect_args = {"check_same_thread": False}
+    engine = create_engine(
+        settings.database_url,
+        connect_args=connect_args,
+        echo=settings.debug
+    )
+else:
+    engine = create_engine(
+        settings.database_url,
+        pool_pre_ping=True,
+        pool_size=5,
+        max_overflow=10,
+        pool_recycle=3600,
+        echo=settings.debug
+    )
 
 # Session factory
 SessionLocal = sessionmaker(

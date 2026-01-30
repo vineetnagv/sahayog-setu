@@ -7,10 +7,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
+
 from app.config import get_settings
-from app.routers import health, workers, jobs, farmers
+from app.routers import health, workers, jobs, farmers, allocation, job_allocation, matching
 
 settings = get_settings()
+
 
 
 @asynccontextmanager
@@ -79,6 +81,21 @@ app.include_router(
     farmers.router,
     prefix=settings.api_prefix,
     tags=["Farmers & Private Demand"]
+)
+app.include_router(
+    allocation.router,
+    prefix=settings.api_prefix,
+    tags=["Allocation Algorithm (Geospatial + VEDAS)"]
+)
+app.include_router(
+    job_allocation.router,
+    prefix=settings.api_prefix,
+    tags=["Job Allocation (Enhanced Location + Necessity)"]
+)
+app.include_router(
+    matching.router,
+    prefix=settings.api_prefix,
+    tags=["Matching Engine (Optimal Allocation)"]
 )
 
 

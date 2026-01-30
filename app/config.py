@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     supabase_url: Optional[str] = None
     supabase_key: Optional[str] = None
     
+    # External APIs
+    vedas_api_key: Optional[str] = "wUHMJtqXrBdEz_wFQkIdgQ"
+    
     # API Settings
     api_prefix: str = "/api/v1"
     
