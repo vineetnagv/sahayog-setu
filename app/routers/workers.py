@@ -120,44 +120,55 @@ async def create_worker(worker: WorkerCreate, db: Session = Depends(get_db)):
         )
     
     # Calculate initial need score
-    need_score = calculate_need_score(
-        days_since_last_work=0,
-        family_size=worker.family_size,
-        land_owned_acres=worker.land_owned_acres
-    )
-    
-    # Insert new worker
-    worker_id = str(uuid.uuid4())
-    db.execute(
-        text("""
-            INSERT INTO workers (
-                id, aadhaar_hash, name, phone, village_code, dialect,
-                need_score, is_available, family_size, land_owned_acres,
-                days_since_last_work
-            ) VALUES (
-                :id, :aadhaar_hash, :name, :phone, :village_code, :dialect,
-                :need_score, TRUE, :family_size, :land_owned_acres, 0
-            )
-        """),
-        {
-            "id": worker_id,
-            "aadhaar_hash": aadhaar_hash,
-            "name": worker.name,
-            "phone": worker.phone,
-            "village_code": worker.village_code,
-            "dialect": worker.dialect,
-            "need_score": need_score,
-            "family_size": worker.family_size,
-            "land_owned_acres": worker.land_owned_acres
+    try:
+        need_score = calculate_need_score(
+            days_since_last_work=0,
+            family_size=worker.family_size,
+            land_owned_acres=worker.land_owned_acres
+        )
+        
+        # Insert new worker
+        worker_id = str(uuid.uuid4())
+        db.execute(
+            text("""
+                INSERT INTO workers (
+                    id, aadhaar_hash, name, phone, village_code, dialect,
+                    need_score, is_available, family_size, land_owned_acres,
+                    days_since_last_work
+                ) VALUES (
+                    :id, :aadhaar_hash, :name, :phone, :village_code, :dialect,
+                    :need_score, TRUE, :family_size, :land_owned_acres, 0
+                )
+            """),
+            {
+                "id": worker_id,
+                "aadhaar_hash": aadhaar_hash,
+                "name": worker.name,
+                "phone": worker.phone,
+                "village_code": worker.village_code,
+                "dialect": worker.dialect,
+                "need_score": need_score,
+                "family_size": worker.family_size,
+                "land_owned_acres": worker.land_owned_acres
+            }
+        )
+        db.commit()
+        
+        return {
+            "message": "Worker registered successfully",
+            "worker_id": worker_id,
+            "need_score": need_score
         }
-    )
-    db.commit()
-    
-    return {
-        "message": "Worker registered successfully",
-        "worker_id": worker_id,
-        "need_score": need_score
-    }
+    except Exception as e:
+        import traceback
+        with open("error_log.txt", "w") as f:
+            f.write(str(e))
+            f.write("\n")
+            f.write(traceback.format_exc())
+            
+        print(f"Error creating worker: {e}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/workers")

@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from app.config import get_settings
-from app.routers import health, workers, jobs, farmers
+from app.routers import health, workers, jobs, farmers, matching, ledger
 
 settings = get_settings()
 
@@ -79,6 +79,16 @@ app.include_router(
     farmers.router,
     prefix=settings.api_prefix,
     tags=["Farmers & Private Demand"]
+)
+app.include_router(
+    matching.router,
+    prefix=settings.api_prefix,
+    tags=["Matching Engine"]
+)
+app.include_router(
+    ledger.router,
+    prefix=settings.api_prefix,
+    tags=["Fairness Ledger & Audit"]
 )
 
 
