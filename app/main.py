@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 
 
 from app.config import get_settings
-from app.routers import health, workers, jobs, farmers, allocation, job_allocation, matching
+from app.routers import health, workers, jobs, farmers, allocation, job_allocation, matching, risk_analysis
 
 settings = get_settings()
 
@@ -96,6 +96,11 @@ app.include_router(
     matching.router,
     prefix=settings.api_prefix,
     tags=["Matching Engine (Optimal Allocation)"]
+)
+app.include_router(
+    risk_analysis.router,
+    prefix=settings.api_prefix,
+    tags=["Drishti Dashboard (HMM Risk Analysis)"]
 )
 
 
